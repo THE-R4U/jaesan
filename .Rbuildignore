@@ -1,0 +1,5 @@
+^LICENSE\.md$
+^README\.Rmd$
+^jaesan\.Rproj$
+^\.Rproj\.user$
+^data-raw$

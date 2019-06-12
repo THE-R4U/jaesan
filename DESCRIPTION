@@ -1,0 +1,30 @@
+Package: jaesan
+Title: Data Package about Property of People who Work(ed) for Korea
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Chanyub",
+           family = "Park",
+           role = c("aut", "cre"),
+           email = "mrchypark@gmail.com",
+           comment = c(ORCID = "0000-0001-6474-2570"))
+Description: Package provides data about property of 
+            people who work or worked for Korea. 
+            Preprocessed data is from  newstapa's jaesan site <https://jaesan.newstapa.org/>.
+            Spacial thanks to newstapa <https://newstapa.org/>.
+            Data License is cc by-sa 4.0 International *Copyright newstapa*.
+License: CCBY-4.0
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.1
+Imports: 
+    magrittr,
+    tibble,
+    dplyr,
+    httr,
+    rvest,
+    jsonlite,
+    attempt,
+    curl
+Suggests: 
+    testthat (>= 2.1.0)
