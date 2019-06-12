@@ -25,6 +25,7 @@ Imports:
     rvest,
     jsonlite,
     attempt,
-    curl
+    curl,
+    utf8
 Suggests: 
     testthat (>= 2.1.0)

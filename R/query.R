@@ -10,6 +10,7 @@
 #' @importFrom jsonlite fromJSON
 #' @importFrom dplyr as_tibble
 #' @importFrom attempt stop_if_not
+#' @importFrom utf8 as_utf8
 #'
 #' @return a [tibble][tibble::tibble-package]
 #'
@@ -23,8 +24,7 @@ query <- function(name, msg = T) {
   }
   httr::POST("https://jaesan.newstapa.org/get_list",
              config = httr::add_headers(`X-Requested-With` = "XMLHttpRequest"),
-             body = list(dataType = "json", phrase = name),
-             encode = "json") %>%
+             body = list(dataType = "json", phrase = utf8::as_utf8(name))) %>%
     httr::content() %>%
     rvest::html_nodes("p") %>%
     rvest::html_text() %>%
