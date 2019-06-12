@@ -42,10 +42,10 @@ This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
 library(jaesan)
-search("전")
-search("노")
-search("김")
-search("이명")
-search("박")
-search("김학")
+query("전")
+query("노")
+query("김")
+query("이명")
+query("박")
+query("김학")
 ```
