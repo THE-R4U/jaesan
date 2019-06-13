@@ -2,13 +2,16 @@
 
 library(dplyr)
 library(rvest)
-library(readr)
 library(stringr)
 library(crul)
 library(purrr)
 library(readr)
+library(readxl)
+library(fs)
+# remotes::install_github("jimhester/archive")
 library(archive)
 library(googledrive)
+library(lubridate)
 
 "https://jaesan.newstapa.org/data" %>%
   read_html() %>%
@@ -28,29 +31,40 @@ node %>%
 cc <- Async$new(urls = tars)
 res <- cc$get(disk = str_c("./data-raw/", file_names), verbose = F)
 
-str_c("./data-raw/",file_names) %>%
+fs::dir_ls("data-raw", glob = "*.zip") %>%
   map(
     ~ archive(.x) %>%
-      filter(str_detect(path, "records")) %>%
-      filter(!str_detect(path, "MAC")) %>%
+      filter(str_detect(path, "xlsx")) %>%
       pull(path)
   ) %>%
   map2_dfr(str_c("./data-raw/",file_names), .,
     ~ expand.grid(.x, .y) %>% as_tibble()
   ) %>%
-  transpose() ->
-  tar_list
+  transpose() %>%
+  map(
+    ~ unzip(.x$Var1, files =  .x$Var2, exdir = "data-raw", junkpaths = T)
+  )
 
-tar_list %>%
-  .[1:5] %>%
-  map_dfr(
-    ~ read_csv(archive_read(.x$Var1, .x$Var2), progress = F)
-  ) %>%
-  select(`순번`:`변동사유`) ->
-  dat
-tar_list[6][[1]] %>%
-  with(read_csv(archive_read(Var1, Var2)))
+fs::dir_ls("data-raw", glob = "*.xlsx") %>%
+  map(
+    ~ read_xlsx(
+      .x,
+      sheet = 3,
+      col_types = "text"
+      ) %>%
+      select(-`순번`) %>%
+      when(
+        names(.)
+      )
+  ) ->
+  raws
 
+raws %>%
+  select(-`순번`) %>%
+  mutate(
+    `연도` = as.integer(`연도`),
+    `종전가액` = parse_number(`종전가액`),
+    )
 
 archive_read(str_c("./data-raw/",file_names)[1])
 
