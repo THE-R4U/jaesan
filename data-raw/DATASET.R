@@ -12,6 +12,8 @@ library(fs)
 library(archive)
 library(googledrive)
 library(lubridate)
+# remotes::install_github("r-lib/zip")
+library(zip)
 
 "https://jaesan.newstapa.org/data" %>%
   read_html() %>%
@@ -38,34 +40,56 @@ fs::dir_ls("data-raw", glob = "*.zip") %>%
       pull(path)
   ) %>%
   map2_dfr(str_c("./data-raw/",file_names), .,
-    ~ expand.grid(.x, .y) %>% as_tibble()
+    ~ expand.grid(zip_name = .x, xlsx = .y) %>% as_tibble()
   ) %>%
   transpose() %>%
   map(
-    ~ unzip(.x$Var1, files =  .x$Var2, exdir = "data-raw", junkpaths = T)
+    ~ zip::unzip(.x$zip_name, exdir = "data-raw/out", junkpaths = T)
   )
 
-fs::dir_ls("data-raw", glob = "*.xlsx") %>%
-  map(
-    ~ read_xlsx(
+fs::dir_ls("data-raw/out", glob = "*records.csv") %>%
+  .[1:9] %>%
+  map_dfr(
+    ~ read_csv(
       .x,
-      sheet = 3,
-      col_types = "text"
+      col_types = cols(.default = col_character()),
+      locale = locale(encoding = "UTF-8")
       ) %>%
-      select(-`순번`) %>%
-      when(
-        names(.)
-      )
+      select(-`순번`)
   ) ->
   raws
 
 raws %>%
-  select(-`순번`) %>%
+  select(-X18, -X19) %>%
   mutate(
-    `연도` = as.integer(`연도`),
-    `종전가액` = parse_number(`종전가액`),
-    )
+    `이름` = if_else(is.na(`이름`), `성명`, `이름`)
+    ) %>%
+  filter(!is.na(`이름`)) %>%
+  select(-`성명`) %>%
+  mutate(
+    `연도` = parse_number(`연도`)
+  ) %>%
+  mutate_at(
+    vars(contains("액")),
+    parse_number
+  ) -> raw19
 
-archive_read(str_c("./data-raw/",file_names)[1])
+recode2011 <- raw19 %>% filter(`연도` ==  2011)
+recode2012 <- raw19 %>% filter(`연도` ==  2012)
+recode2013 <- raw19 %>% filter(`연도` ==  2013)
+recode2014 <- raw19 %>% filter(`연도` ==  2014)
+recode2015 <- raw19 %>% filter(`연도` ==  2015)
+recode2016 <- raw19 %>% filter(`연도` ==  2016)
+recode2017 <- raw19 %>% filter(`연도` ==  2017)
+recode2018 <- raw19 %>% filter(`연도` ==  2018)
 
-usethis::use_data("DATASET")
+usethis::use_data(recode2011, overwrite = T)
+usethis::use_data(recode2012, overwrite = T)
+usethis::use_data(recode2013, overwrite = T)
+usethis::use_data(recode2014, overwrite = T)
+usethis::use_data(recode2015, overwrite = T)
+usethis::use_data(recode2016, overwrite = T)
+usethis::use_data(recode2017, overwrite = T)
+usethis::use_data(recode2018, overwrite = T)
+
+fs::dir_delete("data-raw/out/")

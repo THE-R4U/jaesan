@@ -49,3 +49,12 @@ query("이명")
 query("박")
 query("김학")
 ```
+
+recode data from 2011 to 2018 available.
+
+```{r}
+library(dplyr)
+recode2011 %>% 
+  glimpse()
+
+```

@@ -39,3 +39,4 @@ rsconnect/
 *.zip
 *.xlsx
 *.DS_Store
+./data-raw/out*
