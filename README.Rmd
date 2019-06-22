@@ -54,7 +54,11 @@ recode data from 2011 to 2018 available.
 
 ```{r}
 library(dplyr)
-recode2011 %>% 
-  glimpse()
+library(purrr)
 
+2011:2018 %>%
+  paste0("recode", .) %>% 
+  iwalk(
+    ~ glimpse(get(.x))
+  )
 ```
